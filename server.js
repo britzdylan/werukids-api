@@ -18,6 +18,7 @@ const mongoose = require('mongoose');
 //import routes
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
+const profileRouter = require('./routes/profile');
 
 //logger
 process.on('uncaughtException', (ex) => {
@@ -63,6 +64,7 @@ const PORT = process.env.PORT;
 // routes
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/profile', profileRouter);
 
 app.get('/', (req, res) => {
   // res.send("Your are awesome, but don't use this end-point ;)");

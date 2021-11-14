@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       required: false,
       maxlength: 1024,
-      default: null
+      default: null,
     },
     email_verified: {
       type: Boolean,
@@ -38,7 +38,7 @@ const UserSchema = new mongoose.Schema(
     },
     account_finalized: {
       type: Boolean,
-      
+
       default: false,
     },
     validation_code: {
@@ -103,23 +103,23 @@ const UserSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        // primary_language: { type: Schema.Types.ObjectId, ref: 'language' },
         age: {
           type: String,
           enum: ['3', '4', '5', '6', '7', '8+'],
-          avatar: {
-            type: String,
-            required: true,
-            enum: [
-              'boy_1',
-              'boy_2',
-              'boy_3',
-              'girl_1',
-              'girl_2',
-              'girl_3',
-              'girl_4',
-            ],
-            primary_language: { type: Schema.Types.ObjectId, ref: 'language' },
-          },
+        },
+        avatar: {
+          type: String,
+          required: true,
+          enum: [
+            'boy_1',
+            'boy_2',
+            'boy_3',
+            'girl_1',
+            'girl_2',
+            'girl_3',
+            'girl_4',
+          ],
         },
       },
     ],

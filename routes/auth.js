@@ -177,7 +177,7 @@ router.post(
         { _id: user._id },
         { $set: value },
         { new: true }
-      ).select('-password -validation_code');
+      );
       res.status(200).json(updatedUser);
     }
 
