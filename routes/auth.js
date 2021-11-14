@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const asyncMiddleware = require('../middleware/async');
+const userEmailCheck = require('../middleware/user-email-check');
+const auth = require('../middleware/auth');
+
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 const userSignUpValidation = require('../validation/user-signup');
@@ -24,13 +27,17 @@ const { sendWelcomeEmail } = require('../services/sendgrid');
 router.post(
   '/create',
   asyncMiddleware(async (req, res) => {
+    if (!req.body.email || req.body.email == '' || req.body.email == null) {
+      res.status(400).send('Invalid Email');
+      return;
+    }
     //check if user exists
     const userPresent = await User.findOne({
       email: req.body.email,
     });
     // if exists return user
     if (userPresent) {
-      res.status(409).json(userPresent);
+      res.status(200).json(userPresent);
       return;
     }
     //if no user then create new User
@@ -185,9 +192,80 @@ router.post(
 @ Auth: false
 ***********/
 router.post(
+  '/login',
+  userEmailCheck,
+  asyncMiddleware(async (req, res) => {
+    // unhash & compare password
+    const match = await bcrypt.compare(req.body.password, req.user.password);
+
+    if (!match) {
+      throw new Error('Invalid password');
+    }
+    ///find user and return user
+    const user = await User.findById(req.user._id).select(
+      '-password -email_verified  -validation_code'
+    );
+    // console.log(user);
+    //create jwt
+    const data = { id: user._id };
+    const accessToken = jwt.sign(data, process.env.JWT_SECRET_KEY);
+    //send back jwt
+    res.status(200).json({ token: accessToken });
+  })
+);
+
+/***********
+@ logout
+@ Auth: false
+***********/
+router.post(
+  '/logout',
+  auth,
+  asyncMiddleware(async (req, res) => {
+    //create jwt
+    var older_token = jwt.sign(
+      { data: null, iat: Math.floor(Date.now() / 1000) - 30 },
+      process.env.JWT_SECRET_KEY
+    );
+
+    //send back jwt
+    res.status(200).send('sign out succesfull');
+  })
+);
+
+/***********
+@ request reset
+@ Auth: true
+***********/
+router.post(
   '/reset',
   asyncMiddleware(async (req, res) => {
-    return true;
+    //find the user
+    let user = await User.findOne({
+      email: req.body.email,
+    });
+
+    if (user === null) {
+      res.status(404).send('User does not exist');
+      return;
+    }
+    //set email to unverified
+    user.email_verified = false;
+    //set password to null
+    user.password = uuidv4();
+    //genereate and email a new code
+    const code = await generateCode();
+    let email = await sendWelcomeEmail(user.email, code); //TODO reset email
+    if (email[0].statusCode != 202) {
+      throw new Error(email);
+    }
+
+    user.validation_code = code;
+    user = await user.save();
+    if (!user) {
+      throw new Error('DB Error');
+    }
+    res.status(202).send('Password reset request sent succesfully');
   })
 );
 
