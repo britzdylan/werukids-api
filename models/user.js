@@ -44,32 +44,49 @@ const UserSchema = new mongoose.Schema(
     validation_code: {
       type: Number,
     },
+    subscription: {
+      type: Schema.Types.ObjectId,
+      ref: 'subscription',
+      default: '61920a8993acecd9f0deab1f',
+    },
+    subscription_status: {
+      type: String,
+      required: true,
+      default: 'trail',
+      enum: ['active', 'paused', 'trail', 'suspended'],
+    },
+    subscription_started: {
+      type: String,
+    },
     billing: {
       transaction_history: [],
-      subscription: { type: Schema.Types.ObjectId, ref: 'subscription' },
-      subscription_status: {
-        type: String,
-        required: true,
-        default: 'trail',
-        enum: ['active', 'paused', 'trail', 'suspended'],
-      },
       card: {
         number: {
           type: Number,
+          default: null,
         },
         cvv: {
           type: Number,
+          default: null,
         },
         name: {
           type: String,
+          default: '',
         },
         expiry: {
           month: {
             type: String,
+            default: '',
           },
           year: {
             type: String,
+            default: '',
           },
+        },
+        active: {
+          required: true,
+          default: false,
+          type: Boolean,
         },
       },
       street: {
@@ -103,7 +120,7 @@ const UserSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
-        // primary_language: { type: Schema.Types.ObjectId, ref: 'language' },
+        primary_language: { type: Number, required: true },
         age: {
           type: String,
           enum: ['3', '4', '5', '6', '7', '8+'],

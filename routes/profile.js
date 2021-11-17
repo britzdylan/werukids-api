@@ -63,6 +63,7 @@ router.post(
           'profiles.$.name': req.body.data.name,
           'profiles.$.age': req.body.data.age,
           'profiles.$.avatar': req.body.data.avatar,
+          'profiles.$.primary_language': req.body.data.primary_language,
         },
       },
       { new: true, timeStamps: false }

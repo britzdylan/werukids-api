@@ -3,35 +3,29 @@ const router = express.Router();
 const asyncMiddleware = require('../middleware/async');
 const auth = require('../middleware/auth');
 
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 const Subcsription = require('../models/subscription');
+const User = require('../models/user');
 
 /***********
-@ Get User
+@ Get Subscriptions
 @ Auth: true
 ***********/
 router.get(
   '/',
   auth,
   asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.id)
-      .populate('subscription')
-      .select('-password -email_verified  -validation_code');
+    let allSubs = await Subcsription.find();
 
-    if (!user) {
-      res.status(404).send('User does not exist');
-
+    if (allSubs instanceof Error) {
+      res.status(500).send(allSubs);
       return;
     }
-
-    res.status(200).json({ user: user });
+    res.status(200).json(allSubs);
   })
 );
+
 /***********
-@ Update user names
+@ Update User Subscription
 @ Auth: true
 ***********/
 router.post(
@@ -44,36 +38,12 @@ router.post(
       res.status(404).send('User does not exist');
       return;
     }
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: req.id },
-      {
-        $set: req.body.data,
-      },
-      { new: true, timeStamps: false }
-    );
 
-    if (updatedUser instanceof Error) {
-      res.status(500).send(updatedUser);
+    if (!user.billing.card.active) {
+      res.status(404).send('Please add a card to your account');
       return;
     }
-    res.status(200).send('Update success');
-  })
-);
 
-/***********
-@ Update user notification preferences
-@ Auth: true
-***********/
-router.post(
-  '/update/notifications',
-  auth,
-  asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.id);
-
-    if (!user) {
-      res.status(404).send('User does not exist');
-      return;
-    }
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.id },
       {
@@ -91,28 +61,45 @@ router.post(
 );
 
 /***********
-@ Detel User
+@ Update User Billing Details
 @ Auth: true
 ***********/
-router.delete(
-  '/delete',
+router.post(
+  '/billing/update',
   auth,
   asyncMiddleware(async (req, res) => {
     const user = await User.findById(req.id);
 
     if (!user) {
       res.status(404).send('User does not exist');
-
       return;
     }
 
-    const del = user.delete();
-    if (del instanceof Error) {
-      res.status(500).send(del);
+    // TODO verify card details
+
+    const data = { ...req.body };
+    data.billing.card.active = true;
+    console.log(data);
+
+    // if (!user.billing.card.active) {
+    //   res.status(404).send('Please add a card to your account');
+    //   return;
+    // }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: req.id },
+      {
+        $set: data,
+      },
+      { new: true, timeStamps: false }
+    );
+
+    if (updatedUser instanceof Error) {
+      res.status(500).send(updatedUser);
       return;
     }
-
-    res.status(200).json('account successfully removed');
+    res.status(200).send('Update success');
   })
 );
+
 module.exports = router;
