@@ -20,6 +20,7 @@ const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
 const profileRouter = require('./routes/profile');
 const subRouter = require('./routes/subscriptions');
+const ratingRouter = require('./routes/rating');
 
 //logger
 process.on('uncaughtException', (ex) => {
@@ -67,6 +68,7 @@ app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/profile', profileRouter);
 app.use('/subscriptions', subRouter);
+app.use('/rating', ratingRouter);
 
 app.get('/', (req, res) => {
   // res.send("Your are awesome, but don't use this end-point ;)");

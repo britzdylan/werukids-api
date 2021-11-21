@@ -3,7 +3,7 @@ const router = express.Router();
 const asyncMiddleware = require('../middleware/async');
 const userEmailCheck = require('../middleware/user-email-check');
 const auth = require('../middleware/auth');
-
+const axios = require('axios');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -11,6 +11,13 @@ const User = require('../models/user');
 
 const userSignUpValidation = require('../validation/user-signup');
 
+// google
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client({
+  clientId: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  redirectUri: process.env.REDIRECT_URI,
+});
 //functions
 const {
   generateCode,
@@ -266,6 +273,41 @@ router.post(
       throw new Error('DB Error');
     }
     res.status(202).send('Password reset request sent succesfully');
+  })
+);
+
+/***********
+@ Google
+@ Auth: true
+***********/
+router.post(
+  '/google',
+  asyncMiddleware(async (req, res) => {
+    const { data } = await axios({
+      url: `https://oauth2.googleapis.com/token`,
+      method: 'post',
+      data: {
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        redirect_uri: process.env.REDIRECT_URI,
+        grant_type: 'authorization_code',
+        code: req.body.code,
+      },
+    });
+    console.log(data);
+    res.status(201);
+    res.send('name, email, picture');
+  })
+);
+
+router.post(
+  '/google/login',
+  asyncMiddleware(async (req, res) => {
+    console.log(req.body);
+    // const { name, email, picture } = ticket.getPayload();
+    // console.log(name, email, picture);
+    res.status(201);
+    res.send('name, email, picture');
   })
 );
 

@@ -18,8 +18,7 @@ router.get(
   auth,
   asyncMiddleware(async (req, res) => {
     const user = await User.findById(req.id)
-      .populate('subscription')
-      .select('-password -email_verified  -validation_code');
+    .select('-password -email_verified  -validation_code');
 
     if (!user) {
       res.status(404).send('User does not exist');
@@ -115,4 +114,5 @@ router.delete(
     res.status(200).json('account successfully removed');
   })
 );
+
 module.exports = router;

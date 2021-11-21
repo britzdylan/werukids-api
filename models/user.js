@@ -3,6 +3,10 @@ const Schema = require('mongoose').Schema;
 
 const UserSchema = new mongoose.Schema(
   {
+    pin: {
+      type: String,
+      required: false,
+    },
     first_name: {
       type: String,
       required: false,
@@ -44,66 +48,47 @@ const UserSchema = new mongoose.Schema(
     validation_code: {
       type: Number,
     },
-    subscription: {
-      type: Schema.Types.ObjectId,
-      ref: 'subscription',
-      default: '61920a8993acecd9f0deab1f',
-    },
-    subscription_status: {
-      type: String,
-      required: true,
-      default: 'trail',
-      enum: ['active', 'paused', 'trail', 'suspended'],
-    },
-    subscription_started: {
-      type: String,
-    },
+
     billing: {
-      transaction_history: [],
-      card: {
-        number: {
-          type: Number,
-          default: null,
-        },
-        cvv: {
-          type: Number,
-          default: null,
-        },
-        name: {
+      authorization: {
+        authorization_code: { type: String },
+        card_type: { type: String },
+        last4: {
           type: String,
-          default: '',
         },
-        expiry: {
-          month: {
-            type: String,
-            default: '',
-          },
-          year: {
-            type: String,
-            default: '',
-          },
+        exp_month: {
+          type: String,
         },
-        active: {
-          required: true,
-          default: false,
-          type: Boolean,
-        },
+        exp_year: { type: String },
+        bin: { type: String },
+        bank: { type: String },
+        channel: { type: String },
+        signature: { type: String },
+        reusable: { type: Boolean },
+        country_code: { type: String },
+        account_name: { type: String },
       },
-      street: {
-        type: String,
-        default: '',
+      paystack_customer_id: { type: Number },
+      paystack_customer_code: { type: String },
+      plan: {
+        id: { type: Number },
+        name: { type: String },
+        plan_code: { type: String },
+        description: { type: String },
+        amount: { type: Number },
+        interval: { type: String },
+        send_invoices: { type: Boolean },
+        send_sms: { type: Boolean },
+        currency: { type: String },
       },
-      city: {
+      subscription_started: {
         type: String,
-        default: '',
       },
-      country: {
+      subscription_status: {
         type: String,
-        default: '',
-      },
-      postalcode: {
-        type: String,
-        default: '',
+        required: true,
+        default: 'trail',
+        enum: ['active', 'paused', 'trail', 'suspended'],
       },
     },
     terms_agreed_date: {
