@@ -129,7 +129,6 @@ router.post(
   '/paystack',
   asyncMiddleware(async (req, res) => {
     console.log(req.body);
-    res.status(200);
     // Retrieve the request's body
     const event = req.body;
     // Do something with event
@@ -161,7 +160,7 @@ router.post(
           return;
         }
 
-        res.status(200);
+        res.send(200);
         return;
     }
 
