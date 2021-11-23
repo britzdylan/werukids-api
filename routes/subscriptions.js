@@ -142,20 +142,17 @@ router.post(
 
     switch (event.event) {
       case 'subscription.not_renew':
-        const newData = {
-          billing: {
-            authorization: event.data.authorization,
-            subscription_status: 'suspended',
-            subscription_cancelled: event.data.cancelledAt,
-          },
-        };
-        let updatedUser = await User.findOneAndUpdate(
-          { _id: user.id },
-          {
-            $set: newData,
-          },
-          { new: true, timeStamps: false }
-        );
+        user.billing.authorization = event.data.authorization;
+        user.billing.subscription_status = 'suspended';
+        user.billing.subscription_cancelled = event.data.cancelledAt;
+        // let updatedUser = await User.findOneAndUpdate(
+        //   { _id: user.id },
+        //   {
+        //     $set: newData,
+        //   },
+        //   { new: true, timeStamps: false }
+        // );
+        let updatedUser = await user.save();
 
         if (updatedUser instanceof Error) {
           res.status(500).send(updatedUser);
@@ -165,31 +162,38 @@ router.post(
         res.send(200);
 
         return;
-        break;
-      case 'subscription.create':
-        const payData = {
-          billing: {
-            subscription_code: event.data.subscription_code,
-            authorization: event.data.authorization,
-            paystack_customer_id: event.data.customer.id,
-            paystack_customer_code: event.data.customer.customer_code,
-            plan: event.data.plan,
-            subscription_started: event.data.created_at,
-            next_payment_date: event.data.next_payment_date,
-            subscription_status: 'active',
-          },
-        };
 
-        let updatedUserTwo = await User.findOneAndUpdate(
-          { _id: user.id },
-          {
-            $set: payData,
-          },
-          { new: true, timeStamps: false }
-        );
+      case 'subscription.create':
+        user.billing.authorization = event.data.authorization;
+        user.billing.subscription_status = 'active';
+        user.billing.subscription_cancelled = event.data.cancelledAt;
+        user.billing.subscription_code = event.data.subscription_code;
+        user.billing.paystack_customer_id = event.data.customer.id;
+        user.billing.paystack_customer_code = event.data.customer.customer_code;
+        user.billing.plan = event.data.plan;
+        user.billing.subscription_started = event.data.created_at;
+        user.billing.next_payment_date = event.data.next_payment_date;
+
+        let updatedUserTwo = await user.save();
 
         if (updatedUserTwo instanceof Error) {
-          res.status(500).send(updatedUser);
+          res.sendStatus.status(500).send(updatedUserTwo);
+          return;
+        }
+
+        res.sendStatus(200);
+        return;
+      case 'charge.success':
+        user.billing.authorization = event.data.authorization;
+        user.billing.subscription_status = 'active';
+        user.billing.subscription_cancelled = null;
+        user.billing.paystack_customer_id = event.data.customer.id;
+        user.billing.paystack_customer_code = event.data.customer.customer_code;
+        user.billing.plan = event.data.plan;
+        let updateUsr = await user.save();
+
+        if (updateUsr instanceof Error) {
+          res.status(500).send(updateUsr);
           return;
         }
 
