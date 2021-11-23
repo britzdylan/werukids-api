@@ -133,7 +133,7 @@ router.post(
     const event = req.body;
     // Do something with event
     let user;
-    user = await User.findOne(event.customer.email);
+    user = await User.findOne(event.data.customer.email);
 
     if (!user) {
       res.status(404).send('User does not exist');
@@ -162,7 +162,7 @@ router.post(
           return;
         }
 
-        res.status(200).send(200);
+        res.send(200);
 
         return;
         break;
@@ -193,11 +193,11 @@ router.post(
           return;
         }
 
-        res.status(200).send(200);
+        res.send(200);
         return;
     }
 
-    res.status(200).send(200);
+    res.send(200);
   })
 );
 
