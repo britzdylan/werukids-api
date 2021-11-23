@@ -5,6 +5,8 @@ const auth = require('../middleware/auth');
 const crypto = require('crypto');
 const payStackSecret = process.env.PAYSTACK_SECRET_KEY;
 const User = require('../models/user');
+const winston = require('winston');
+
 // functions
 const {
   initPayment,
@@ -58,6 +60,7 @@ router.post(
     // }
 
     const data = await manageSubscription(req.body.code);
+    // TODO email link with sendgrid
 
     if (!data.status) {
       res.status(404).send(data.message);
@@ -134,7 +137,36 @@ router.post(
       // Retrieve the request's body
       const event = req.body;
       // Do something with event
-      console.log(event);
+      switch (event.event) {
+        case 'subscription.disable':
+          const user = await User.findOne(event.customer.email);
+
+          if (!user) {
+            res.status(404).send('User does not exist');
+            return;
+          }
+          const newData = {
+            billing: {
+              authorization: event.event.authorization,
+              subscription_status: 'suspended',
+            },
+          };
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: user.id },
+            {
+              $set: newData,
+            },
+            { new: true, timeStamps: false }
+          );
+
+          if (updatedUser instanceof Error) {
+            res.status(500).send(updatedUser);
+            return;
+          }
+
+          res.status(200);
+          return;
+      }
     }
     res.status(200);
   })
