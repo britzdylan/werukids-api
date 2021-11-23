@@ -91,6 +91,7 @@ const UserSchema = new mongoose.Schema(
         default: 'trail',
         enum: ['active', 'paused', 'trail', 'suspended'],
       },
+      next_payment_date: { type: String },
     },
     terms_agreed_date: {
       type: String,

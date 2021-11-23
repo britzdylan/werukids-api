@@ -131,23 +131,25 @@ router.post(
     console.log(req.body);
     // Retrieve the request's body
     const event = req.body;
+    let UpdatedUser;
     // Do something with event
+    let user;
+    user = await User.findOne(event.customer.email);
+
+    if (!user) {
+      res.status(404).send('User does not exist');
+      return;
+    }
     switch (event.event) {
       case 'subscription.not_renew':
-        const user = await User.findOne(event.customer.email);
-
-        if (!user) {
-          res.status(404).send('User does not exist');
-          return;
-        }
         const newData = {
           billing: {
-            authorization: event.event.authorization,
+            authorization: event.data.authorization,
             subscription_status: 'suspended',
-            subscription_cancelled: event.event.cancelledAt,
+            subscription_cancelled: event.data.cancelledAt,
           },
         };
-        const updatedUser = await User.findOneAndUpdate(
+        updatedUser = await User.findOneAndUpdate(
           { _id: user.id },
           {
             $set: newData,
@@ -160,7 +162,38 @@ router.post(
           return;
         }
 
-        res.send(200);
+        res.status(200).send(200);
+
+        return;
+        break;
+      case 'subscription.create':
+        const payData = {
+          billing: {
+            subscription_code: event.data.subscription_code,
+            authorization: event.data.authorization,
+            paystack_customer_id: event.data.customer.id,
+            paystack_customer_code: event.data.customer.customer_code,
+            plan: event.data.plan,
+            subscription_started: event.data.created_at,
+            next_payment_date: event.data.next_payment_date,
+            subscription_status: 'active',
+          },
+        };
+
+        updatedUser = await User.findOneAndUpdate(
+          { _id: user.id },
+          {
+            $set: payData,
+          },
+          { new: true, timeStamps: false }
+        );
+
+        if (updatedUser instanceof Error) {
+          res.status(500).send(updatedUser);
+          return;
+        }
+
+        res.status(200).send(200);
         return;
     }
 
