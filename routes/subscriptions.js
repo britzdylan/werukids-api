@@ -131,7 +131,6 @@ router.post(
     console.log(req.body);
     // Retrieve the request's body
     const event = req.body;
-    let UpdatedUser;
     // Do something with event
     let user;
     user = await User.findOne(event.customer.email);
@@ -140,6 +139,7 @@ router.post(
       res.status(404).send('User does not exist');
       return;
     }
+
     switch (event.event) {
       case 'subscription.not_renew':
         const newData = {
@@ -149,7 +149,7 @@ router.post(
             subscription_cancelled: event.data.cancelledAt,
           },
         };
-        updatedUser = await User.findOneAndUpdate(
+        let updatedUser = await User.findOneAndUpdate(
           { _id: user.id },
           {
             $set: newData,
@@ -180,7 +180,7 @@ router.post(
           },
         };
 
-        updatedUser = await User.findOneAndUpdate(
+        let updatedUser = await User.findOneAndUpdate(
           { _id: user.id },
           {
             $set: payData,
@@ -197,7 +197,7 @@ router.post(
         return;
     }
 
-    res.status(200);
+    res.status(200).send(200);
   })
 );
 
