@@ -180,7 +180,7 @@ router.post(
           },
         };
 
-        let updatedUser = await User.findOneAndUpdate(
+        let updatedUserTwo = await User.findOneAndUpdate(
           { _id: user.id },
           {
             $set: payData,
@@ -188,7 +188,7 @@ router.post(
           { new: true, timeStamps: false }
         );
 
-        if (updatedUser instanceof Error) {
+        if (updatedUserTwo instanceof Error) {
           res.status(500).send(updatedUser);
           return;
         }
