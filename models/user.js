@@ -84,6 +84,7 @@ const UserSchema = new mongoose.Schema(
       subscription_started: {
         type: String,
       },
+      subscription_cancelled: { type: String },
       subscription_status: {
         type: String,
         required: true,

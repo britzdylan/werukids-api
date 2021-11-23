@@ -129,45 +129,42 @@ router.post(
   '/paystack',
   asyncMiddleware(async (req, res) => {
     console.log(req.body);
-    const hash = crypto
-      .createHmac('sha512', payStackSecret)
-      .update(JSON.stringify(req.body))
-      .digest('hex');
-    if (hash == req.headers['x-paystack-signature']) {
-      // Retrieve the request's body
-      const event = req.body;
-      // Do something with event
-      switch (event.event) {
-        case 'subscription.disable':
-          const user = await User.findOne(event.customer.email);
+    res.status(200);
+    // Retrieve the request's body
+    const event = req.body;
+    // Do something with event
+    switch (event.event) {
+      case 'subscription.not_renew':
+        const user = await User.findOne(event.customer.email);
 
-          if (!user) {
-            res.status(404).send('User does not exist');
-            return;
-          }
-          const newData = {
-            billing: {
-              authorization: event.event.authorization,
-              subscription_status: 'suspended',
-            },
-          };
-          const updatedUser = await User.findOneAndUpdate(
-            { _id: user.id },
-            {
-              $set: newData,
-            },
-            { new: true, timeStamps: false }
-          );
-
-          if (updatedUser instanceof Error) {
-            res.status(500).send(updatedUser);
-            return;
-          }
-
-          res.status(200);
+        if (!user) {
+          res.status(404).send('User does not exist');
           return;
-      }
+        }
+        const newData = {
+          billing: {
+            authorization: event.event.authorization,
+            subscription_status: 'suspended',
+            subscription_cancelled: event.event.cancelledAt,
+          },
+        };
+        const updatedUser = await User.findOneAndUpdate(
+          { _id: user.id },
+          {
+            $set: newData,
+          },
+          { new: true, timeStamps: false }
+        );
+
+        if (updatedUser instanceof Error) {
+          res.status(500).send(updatedUser);
+          return;
+        }
+
+        res.status(200);
+        return;
     }
+
     res.status(200);
   })
 );
