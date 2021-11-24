@@ -61,6 +61,22 @@ async function getCustomer(id) {
   return paystack
     .get(`${base_url}/customer/${id}`)
     .then(function (res) {
+      console.log(res.data);
+      return res.data;
+    })
+    .catch(function (error) {
+      return error.response.data;
+    });
+}
+
+async function deactivate(code, token) {
+  return paystack
+    .post(`${base_url}/subscription/disable`, {
+      code: code,
+      token: token,
+    })
+    .then(function (res) {
+      console.log(res.data);
       return res.data;
     })
     .catch(function (error) {
@@ -72,4 +88,6 @@ module.exports = {
   initPayment,
   manageSubscription,
   verifyPayment,
+  getCustomer,
+  deactivate,
 };

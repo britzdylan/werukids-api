@@ -92,6 +92,7 @@ const UserSchema = new mongoose.Schema(
         enum: ['active', 'paused', 'trail', 'suspended'],
       },
       next_payment_date: { type: String },
+      subscription_code: { type: String },
     },
     terms_agreed_date: {
       type: String,

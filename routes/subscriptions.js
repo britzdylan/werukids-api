@@ -12,6 +12,7 @@ const {
   initPayment,
   manageSubscription,
   verifyPayment,
+  getCustomer,
 } = require('../services/paystack');
 
 /***********
@@ -52,13 +53,6 @@ router.post(
   '/manage',
   auth,
   asyncMiddleware(async (req, res) => {
-    // const user = await User.findById(req.id);
-    // console.log(req.body);
-    // if (!user) {
-    //   res.status(404).send('User does not exist');
-    //   return;
-    // }
-
     const data = await manageSubscription(req.body.code);
     // TODO email link with sendgrid
 
@@ -145,13 +139,7 @@ router.post(
         user.billing.authorization = event.data.authorization;
         user.billing.subscription_status = 'suspended';
         user.billing.subscription_cancelled = event.data.cancelledAt;
-        // let updatedUser = await User.findOneAndUpdate(
-        //   { _id: user.id },
-        //   {
-        //     $set: newData,
-        //   },
-        //   { new: true, timeStamps: false }
-        // );
+
         let updatedUser = await user.save();
 
         if (updatedUser instanceof Error) {
@@ -202,6 +190,23 @@ router.post(
     }
 
     res.send(200);
+  })
+);
+/***********
+@ Get transaction history
+@ Auth: true
+***********/
+router.post(
+  '/history',
+  auth,
+  asyncMiddleware(async (req, res) => {
+    const data = await getCustomer(req.body.code);
+    console.log(data);
+    if (!data.status) {
+      res.status(404).send(data.message);
+      return;
+    }
+    res.status(200).json(data.data.transactions);
   })
 );
 

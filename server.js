@@ -46,6 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(cookieParser());
 app.use(headers);
+app.use(cors());
 
 //init helmet
 app.use(helmet());

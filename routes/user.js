@@ -8,7 +8,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Subcsription = require('../models/subscription');
-
+// functions
+const { deactivate } = require('../services/paystack');
 /***********
 @ Get User
 @ Auth: true
@@ -17,8 +18,9 @@ router.get(
   '/',
   auth,
   asyncMiddleware(async (req, res) => {
-    const user = await User.findById(req.id)
-    .select('-password -email_verified  -validation_code');
+    const user = await User.findById(req.id).select(
+      '-password -email_verified  -validation_code'
+    );
 
     if (!user) {
       res.status(404).send('User does not exist');
@@ -105,6 +107,11 @@ router.delete(
       return;
     }
 
+    let subs = await deactivate(req.body.auth_code);
+    if (subs instanceof Error) {
+      res.status(500).send(subs);
+      return;
+    }
     const del = user.delete();
     if (del instanceof Error) {
       res.status(500).send(del);
