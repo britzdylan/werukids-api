@@ -26,25 +26,25 @@ async function initPayment(amount, email, callback_url, plan) {
     });
 }
 
-async function manageSubscription(id) {
-  const res = await getCustomer(id);
-  if (!res.status) {
-    return res;
-  }
+// async function manageSubscription(id) {
+//   const res = await getCustomer(id);
+//   if (!res.status) {
+//     return res;
+//   }
 
-  const code = res.data.subscriptions[0].subscription_code;
-  console.log(code, 'code');
-  return paystack
-    .get(`${base_url}/subscription/${code}/manage/link`)
-    .then(function (res) {
-      console.log(res);
-      return res.data;
-    })
-    .catch(function (error) {
-      console.log(error.response);
-      return error.response.data;
-    });
-}
+//   const code = res.data.subscriptions[0].subscription_code;
+//   console.log(code, 'code');
+//   return paystack
+//     .get(`${base_url}/subscription/${code}/manage/link`)
+//     .then(function (res) {
+//       console.log(res);
+//       return res.data;
+//     })
+//     .catch(function (error) {
+//       console.log(error.response);
+//       return error.response.data;
+//     });
+// }
 
 async function verifyPayment(reference) {
   return paystack
