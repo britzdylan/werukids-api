@@ -44,7 +44,7 @@ async function manageSubscription(id) {
       console.log(error.response);
       return error.response.data;
     });
-  }
+}
 
 async function verifyPayment(reference) {
   return paystack
@@ -69,7 +69,17 @@ async function getCustomer(id) {
     });
 }
 
-async function deactivate(code, token) {
+async function deactivate(id) {
+  const res = await getCustomer(id);
+  if (!res.status) {
+    return res;
+  }
+
+  const code =
+    res.data.subscriptions[res.data.subscriptions.length - 1].subscription_code;
+  const token =
+    res.data.subscriptions[res.data.subscriptions.length - 1].email_token;
+  console.log(res.data.subscriptions[res.data.subscriptions.length - 1]);
   return paystack
     .post(`${base_url}/subscription/disable`, {
       code: code,

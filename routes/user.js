@@ -107,7 +107,7 @@ router.delete(
       return;
     }
 
-    let subs = await deactivate(req.body.auth_code);
+    let subs = await deactivate(req.body.code);
     if (subs instanceof Error) {
       res.status(500).send(subs);
       return;
