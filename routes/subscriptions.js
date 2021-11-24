@@ -143,6 +143,7 @@ router.post(
         let updatedUser = await user.save();
 
         if (updatedUser instanceof Error) {
+          console.log(updatedUser);
           res.status(500).send(updatedUser);
           return;
         }
@@ -165,6 +166,7 @@ router.post(
         let updatedUserTwo = await user.save();
 
         if (updatedUserTwo instanceof Error) {
+          console.log(updatedUserTwo);
           res.sendStatus.status(500).send(updatedUserTwo);
           return;
         }
@@ -181,6 +183,7 @@ router.post(
         let updateUsr = await user.save();
 
         if (updateUsr instanceof Error) {
+          console.log(updateUsr);
           res.status(500).send(updateUsr);
           return;
         }
