@@ -122,13 +122,13 @@ router.post(
 router.post(
   '/paystack',
   asyncMiddleware(async (req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
     // Retrieve the request's body
     const event = req.body;
     // Do something with event
     let user;
     user = await User.findOne({ email: event.data.customer.email });
-    console.log(user);
+    // console.log(user);
     if (!user) {
       res.status(404).send('User does not exist');
       return;

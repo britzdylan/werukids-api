@@ -44,7 +44,7 @@ async function manageSubscription(id) {
       console.log(error.response);
       return error.response.data;
     });
-}
+  }
 
 async function verifyPayment(reference) {
   return paystack
