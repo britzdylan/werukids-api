@@ -25,7 +25,10 @@ const {
   saveUpdateuser,
   setResetState,
 } = require('../utils/emailValidation');
-const { sendWelcomeEmail } = require('../services/sendgrid');
+const {
+  sendVerificationEmail,
+  sendResetEmail,
+} = require('../services/sendgrid');
 
 /***********
 @ Create Account
@@ -56,8 +59,8 @@ router.post(
       validation_code: code,
     });
     // email code to user
-    let email = await sendWelcomeEmail(req.body.email, code);
-
+    let email = await sendVerificationEmail(req.body.email, code);
+    console.log(email);
     if (email[0].statusCode != 202) {
       throw new Error(email);
     }
@@ -123,7 +126,7 @@ router.post(
       throw new Error('Database error');
     }
     // email code to user
-    let email = await sendWelcomeEmail(req.body.email, code);
+    let email = await sendResetEmail(req.body.email, code);
 
     if (email[0].statusCode != 202) {
       throw new Error(email);
@@ -262,7 +265,7 @@ router.post(
     user.password = uuidv4();
     //genereate and email a new code
     const code = await generateCode();
-    let email = await sendWelcomeEmail(user.email, code); //TODO reset email
+    let email = await sendResetEmail(user.email, code);
     if (email[0].statusCode != 202) {
       throw new Error(email);
     }

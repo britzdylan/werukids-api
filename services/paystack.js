@@ -3,7 +3,7 @@ const axios = require('axios');
 const base_url = 'https://api.paystack.co';
 const paystack = axios.create({
   baseURL: base_url,
-  timeout: 1000,
+  timeout: 10000,
   headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
 });
 
@@ -18,10 +18,11 @@ async function initPayment(amount, email, callback_url, plan) {
       channels: ['card'],
     })
     .then(function (res) {
-      // console.log(res.data);
+      console.log(res.data);
       return res.data;
     })
     .catch(function (error) {
+      console.log(error);
       return error.response.data;
     });
 }
@@ -71,10 +72,10 @@ async function getCustomer(id) {
 
 async function deactivate(id) {
   const res = await getCustomer(id);
+  console.log(res);
   if (!res.status) {
     return res;
   }
-
   const code =
     res.data.subscriptions[res.data.subscriptions.length - 1].subscription_code;
   const token =

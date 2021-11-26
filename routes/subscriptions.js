@@ -14,7 +14,7 @@ const {
   verifyPayment,
   getCustomer,
 } = require('../services/paystack');
-
+const { sendSubscriptionLink } = require('../services/sendgrid');
 /***********
 @ Setup Paystack Subscriptions
 @ Auth: true
@@ -53,9 +53,20 @@ router.post(
   '/manage',
   auth,
   asyncMiddleware(async (req, res) => {
-    const data = await manageSubscription(req.body.code);
-    // TODO email link with sendgrid
+    const user = await User.findById(req.id);
 
+    if (!user) {
+      res.status(404).send('User does not exist');
+
+      return;
+    }
+    const data = await manageSubscription(req.body.code);
+
+    let email = await sendSubscriptionLink(user.email, data.data.link);
+
+    if (email[0].statusCode != 202) {
+      throw new Error(email);
+    }
     if (!data.status) {
       res.status(404).send(data.message);
       return;
