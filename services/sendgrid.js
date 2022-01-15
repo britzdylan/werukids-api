@@ -1,5 +1,10 @@
+// mail
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// client
+const sgClient = require('@sendgrid/client');
+sgClient.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendVerificationEmail(email, code) {
   const msg = {
@@ -88,8 +93,133 @@ async function sendSubscriptionLink(email, link) {
     });
 }
 
+async function addContactToLists(
+  email,
+  first_name,
+  last_name,
+  account_consent,
+  marketing_consent
+) {
+  const account = '505f339b-5361-4fd2-a4eb-8ee7dafac25b';
+  const marketing = '517b4dda-ab7b-4b44-9065-c562eb1f9eab';
+  let list_ids = [];
+
+  if (account_consent) {
+    list_ids.push(account);
+  }
+
+  if (marketing_consent) {
+    list_ids.push(marketing);
+  }
+
+  const data = {
+    list_ids: list_ids,
+    contacts: [
+      {
+        email: email,
+        first_name: first_name,
+        last_name: last_name,
+      },
+    ],
+  };
+
+  const request = {
+    url: `/v3/marketing/contacts`,
+    method: 'PUT',
+    body: data,
+  };
+
+  return await sgClient
+    .request(request)
+    .then(([response, body]) => {
+      return response;
+    })
+    .catch((error) => {
+      return error;
+    });
+}
+
+async function removeContactsFromList(consent, email) {
+  const account = '505f339b-5361-4fd2-a4eb-8ee7dafac25b';
+  const marketing = '517b4dda-ab7b-4b44-9065-c562eb1f9eab';
+
+  const userId = await getUserId(email);
+  if (userId instanceof Error) throw new Error(userId);
+
+  const queryParams = {
+    contact_ids: userId,
+  };
+
+  return consent.forEach(async (e) => {
+    let request = {};
+    if (e.account) {
+      request = {
+        url: `/v3/marketing/lists/${account}/contacts`,
+        method: 'DELETE',
+        qs: queryParams,
+      };
+
+      return await sgClient
+        .request(request)
+        .then(([response]) => {
+          // console.log(response);
+          return response;
+        })
+        .catch((error) => {
+          console.log(error);
+
+          return error;
+        });
+    }
+
+    if (e.marketing) {
+      request = {
+        url: `/v3/marketing/lists/${marketing}/contacts`,
+        method: 'DELETE',
+        qs: queryParams,
+      };
+
+      return await sgClient
+        .request(request)
+        .then(([response]) => {
+          // console.log(response);
+          return response;
+        })
+        .catch((error) => {
+          console.log(error);
+
+          return error;
+        });
+    }
+  });
+}
+
+async function getUserId(email) {
+  const data = {
+    emails: [email],
+  };
+
+  const request = {
+    url: `/v3/marketing/contacts/search/emails`,
+    method: 'POST',
+    body: data,
+  };
+
+  return await sgClient
+    .request(request)
+    .then(([response, body]) => {
+      // console.log(response.body.result[email].contact.id);
+      return response.body.result[email].contact.id;
+    })
+    .catch((error) => {
+      return error;
+    });
+}
+
 module.exports = {
   sendResetEmail,
   sendVerificationEmail,
   sendSubscriptionLink,
+  addContactToLists,
+  removeContactsFromList,
 };

@@ -139,7 +139,7 @@ router.post(
     // Do something with event
     let user;
     user = await User.findOne({ email: event.data.customer.email });
-    // console.log(user);
+    console.log(user);
     if (!user) {
       res.status(404).send('User does not exist');
       return;

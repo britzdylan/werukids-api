@@ -3,13 +3,16 @@ const router = express.Router();
 const asyncMiddleware = require('../middleware/async');
 const auth = require('../middleware/auth');
 
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Subcsription = require('../models/subscription');
 // functions
 const { deactivate } = require('../services/paystack');
+
+// sendgrid
+const {
+  addContactToLists,
+  removeContactsFromList,
+} = require('../services/sendgrid');
 /***********
 @ Get User
 @ Auth: true
@@ -75,6 +78,37 @@ router.post(
       res.status(404).send('User does not exist');
       return;
     }
+
+    let sgRes = await addContactToLists(
+      user.email,
+      user.first_name,
+      user.last_name,
+      req.body.notifications.account,
+      req.body.notifications.marketing
+    );
+    // console.log(sgRes);
+    if (sgRes.code) {
+      res.status(sgRes.code).send(sgRes.response.body.errors);
+      throw new Error(sgRes.response.body.errors);
+    }
+
+    sgRes = await removeContactsFromList(
+      [
+        {
+          account: !req.body.notifications.account,
+        },
+        {
+          marketing: !req.body.notifications.marketing,
+        },
+      ],
+      user.email
+    );
+    console.log(sgRes);
+    if (sgRes instanceof Error) {
+      // res.status(sgRes.code).send(sgRes.response.body.errors);
+      throw new Error(sgRes.response.body.errors);
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.id },
       {

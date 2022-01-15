@@ -21,7 +21,7 @@ module.exports = function (req, res, next) {
     }
   );
 
-  console.log(user.id, '//////token');
+  // console.log(user.id, '//////token');
   req.id = user.id;
   next();
 };
