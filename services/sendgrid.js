@@ -8,7 +8,7 @@ sgClient.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendVerificationEmail(email, code) {
   const msg = {
-    from: 'werukids@gmail.com', // Change to your verified sender
+    from: 'noreply@werukids.com', // Change to your verified sender
     personalizations: [
       {
         to: [
@@ -37,7 +37,7 @@ async function sendVerificationEmail(email, code) {
 
 async function sendResetEmail(email, code) {
   const msg = {
-    from: 'werukids@gmail.com', // Change to your verified sender
+    from: 'noreply@werukids.com', // Change to your verified sender
     personalizations: [
       {
         to: [
@@ -66,7 +66,7 @@ async function sendResetEmail(email, code) {
 
 async function sendSubscriptionLink(email, link) {
   const msg = {
-    from: 'werukids@gmail.com', // Change to your verified sender
+    from: 'noreply@werukids.com', // Change to your verified sender
     personalizations: [
       {
         to: [
